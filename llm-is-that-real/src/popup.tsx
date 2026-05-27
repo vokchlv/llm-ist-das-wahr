@@ -8,6 +8,8 @@ interface AnalysisResult {
 
 export const PopupApp: React.FC = () => {
   const [selectedText, setSelectedText] = useState<string>('')
+  const [manualText, setManualText] = useState<string>('')
+  const [useManualText, setUseManualText] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [result, setResult] = useState<AnalysisResult | null>(null)
   const [error, setError] = useState<string>('')
@@ -21,17 +23,17 @@ export const PopupApp: React.FC = () => {
       const data = await chrome.storage.local.get('selectedText')
       if (data.selectedText?.trim()) {
         setSelectedText(data.selectedText)
-      } else {
-        setError('Markiere einen Text auf einer Website, um ihn zu überprüfen.')
       }
     } catch (err) {
-      setError('Der Text konnte nicht geladen werden.')
+      console.error('Error loading selected text:', err)
     }
   }
 
+  const textToAnalyze = useManualText ? manualText : selectedText
+
   const handleAnalyze = async () => {
-    if (!selectedText.trim()) {
-      setError('Kein Text zu analysieren')
+    if (!textToAnalyze.trim()) {
+      setError('❌ Kein Text zu analysieren')
       return
     }
 
@@ -42,7 +44,7 @@ export const PopupApp: React.FC = () => {
     try {
       const config = await chrome.storage.local.get('extensionConfig')
       if (!config.extensionConfig) {
-        setError('Bitte konfiguriere einen Provider in den Einstellungen.')
+        setError('⚙️ Bitte konfigurieren Sie einen Provider in den Einstellungen')
         chrome.runtime.openOptionsPage()
         setIsLoading(false)
         return
@@ -52,7 +54,7 @@ export const PopupApp: React.FC = () => {
       const providerConfig = apiKeys?.[selectedProvider]
       
       if (!selectedProvider) {
-        setError('Bitte wähle einen Provider in den Einstellungen.')
+        setError('⚙️ Bitte wählen Sie einen Provider in den Einstellungen')
         chrome.runtime.openOptionsPage()
         setIsLoading(false)
         return
@@ -60,57 +62,99 @@ export const PopupApp: React.FC = () => {
 
       // Pollinations doesn't require a key
       if (selectedProvider !== 'pollinations' && !providerConfig?.key) {
-        setError(`Bitte konfiguriere einen API-Key für ${selectedProvider}.`)
+        setError(`⚙️ Bitte konfigurieren Sie einen API-Key für ${selectedProvider}`)
         chrome.runtime.openOptionsPage()
         setIsLoading(false)
         return
       }
 
       chrome.runtime.sendMessage(
-        { action: 'analyzeText', text: selectedText },
+        { action: 'analyzeText', text: textToAnalyze },
         (response) => {
           setIsLoading(false)
           if (chrome.runtime.lastError) {
-            setError('Fehler: ' + chrome.runtime.lastError.message)
+            setError('❌ Fehler: ' + chrome.runtime.lastError.message)
             return
           }
           if (response?.success) {
             setResult(response.result)
           } else {
-            setError(`Fehler: ${response?.error || 'Unbekannter Fehler'}`)
+            setError(`❌ Fehler: ${response?.error || 'Unbekannter Fehler'}`)
           }
         }
       )
     } catch (err) {
       setIsLoading(false)
-      setError(`Fehler: ${err instanceof Error ? err.message : 'Unbekannter Fehler'}`)
+      setError(`❌ Fehler: ${err instanceof Error ? err.message : 'Unbekannter Fehler'}`)
     }
   }
 
   const handleClear = () => {
-    chrome.storage.local.remove('selectedText')
+    setManualText('')
     setSelectedText('')
+    chrome.storage.local.remove('selectedText')
     setResult(null)
     setError('')
+    setUseManualText(false)
   }
 
   const verdictConfig = {
-    WAHR: { color: '#4CAF50', text: 'Wahr', bgColor: 'rgba(76, 175, 80, 0.1)' },
-    TEILWEISE: { color: '#FF9800', text: 'Teilweise wahr', bgColor: 'rgba(255, 152, 0, 0.1)' },
-    FALSCH: { color: '#F44336', text: 'Falsch oder Irreführend', bgColor: 'rgba(244, 67, 54, 0.1)' },
-    UNKNOWN: { color: '#999', text: 'Unklar', bgColor: 'rgba(153, 153, 153, 0.1)' }
+    WAHR: { color: '#4CAF50', text: '✅ Wahr', bgColor: 'rgba(76, 175, 80, 0.1)' },
+    TEILWEISE: { color: '#FF9800', text: '⚠️ Teilweise wahr', bgColor: 'rgba(255, 152, 0, 0.1)' },
+    FALSCH: { color: '#F44336', text: '❌ Falsch/Irreführend', bgColor: 'rgba(244, 67, 54, 0.1)' },
+    UNKNOWN: { color: '#999', text: '❓ Unbekannt', bgColor: 'rgba(153, 153, 153, 0.1)' }
   }
 
   return (
     <div style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif', padding: '20px' }}>
       {/* Header */}
       <div style={{ marginBottom: '20px', textAlign: 'center' }}>
-        <h1 style={{ fontSize: '24px', margin: '0 0 5px 0', color: '#1976d2' }}>Ist das wahr?</h1>
-        <p style={{ fontSize: '12px', color: '#666', margin: 0 }}>Überprüfe Aussagen mit KI</p>
+        <h1 style={{ fontSize: '24px', margin: '0 0 5px 0', color: '#1976d2' }}>🔍 Ist das wahr?</h1>
+        <p style={{ fontSize: '12px', color: '#666', margin: 0 }}>AI-powered fact-checking</p>
       </div>
 
-      {/* Selected Text Display */}
-      {selectedText && (
+      {/* Text Input Tabs */}
+      {!result && (
+        <div style={{ display: 'flex', gap: '8px', marginBottom: '15px', borderBottom: '1px solid #ddd' }}>
+          {selectedText && (
+            <button
+              onClick={() => setUseManualText(false)}
+              style={{
+                padding: '8px 12px',
+                background: !useManualText ? '#1976d2' : 'transparent',
+                color: !useManualText ? 'white' : '#666',
+                border: 'none',
+                borderRadius: '4px 4px 0 0',
+                cursor: 'pointer',
+                fontSize: '12px',
+                fontWeight: !useManualText ? '600' : '500',
+                transition: 'all 0.2s'
+              }}
+            >
+              📋 Markierter Text
+            </button>
+          )}
+          <button
+            onClick={() => setUseManualText(true)}
+            style={{
+              padding: '8px 12px',
+              background: useManualText ? '#1976d2' : 'transparent',
+              color: useManualText ? 'white' : '#666',
+              border: 'none',
+              borderRadius: '4px 4px 0 0',
+              cursor: 'pointer',
+              fontSize: '12px',
+              fontWeight: useManualText ? '600' : '500',
+              transition: 'all 0.2s'
+            }}
+          >
+            ✏️ Text eingeben
+          </button>
+        </div>
+      )}
+
+      {/* Marked Text Display */}
+      {!useManualText && selectedText && !result && (
         <div style={{
           background: '#e3f2fd',
           padding: '15px',
@@ -120,10 +164,33 @@ export const PopupApp: React.FC = () => {
           maxHeight: '120px',
           overflowY: 'auto'
         }}>
-          <p style={{ fontSize: '11px', fontWeight: '600', color: '#666', margin: '0 0 8px 0' }}>Markierter Text:</p>
+          <p style={{ fontSize: '11px', fontWeight: '600', color: '#666', margin: '0 0 8px 0' }}>📋 Markierter Text:</p>
           <p style={{ fontSize: '13px', lineHeight: '1.5', color: '#333', margin: 0, whiteSpace: 'pre-wrap' }}>
             {selectedText}
           </p>
+        </div>
+      )}
+
+      {/* Manual Text Input */}
+      {useManualText && !result && (
+        <div style={{ marginBottom: '15px' }}>
+          <p style={{ fontSize: '11px', fontWeight: '600', color: '#666', margin: '0 0 8px 0' }}>✏️ Text eingeben (Copy & Paste):</p>
+          <textarea
+            value={manualText}
+            onChange={(e) => setManualText(e.target.value)}
+            placeholder="Text hier einfügen und Analysieren drücken..."
+            style={{
+              width: '100%',
+              height: '120px',
+              padding: '12px',
+              border: '2px solid #1976d2',
+              borderRadius: '6px',
+              fontSize: '13px',
+              fontFamily: 'inherit',
+              resize: 'none',
+              boxSizing: 'border-box'
+            }}
+          />
         </div>
       )}
 
@@ -160,7 +227,7 @@ export const PopupApp: React.FC = () => {
             borderRadius: '50%',
             animation: 'spin 1s linear infinite'
           }} />
-          <p style={{ margin: 0, color: '#666', fontSize: '13px' }}>Text wird analysiert...</p>
+          <p style={{ margin: 0, color: '#666', fontSize: '13px' }}>⏳ Analysiere Text...</p>
         </div>
       )}
 
@@ -170,6 +237,21 @@ export const PopupApp: React.FC = () => {
           animation: 'fadeIn 0.3s ease-in',
           marginBottom: '15px'
         }}>
+          {/* Original Text */}
+          <div style={{
+            background: '#f5f5f5',
+            padding: '12px',
+            borderRadius: '6px',
+            marginBottom: '12px',
+            maxHeight: '80px',
+            overflowY: 'auto'
+          }}>
+            <p style={{ fontSize: '11px', fontWeight: '600', color: '#666', margin: '0 0 6px 0' }}>📋 Analysierter Text:</p>
+            <p style={{ fontSize: '12px', color: '#333', margin: 0, whiteSpace: 'pre-wrap' }}>
+              {textToAnalyze.substring(0, 200)}{textToAnalyze.length > 200 ? '...' : ''}
+            </p>
+          </div>
+
           {/* Verdict */}
           <div style={{
             padding: '15px',
@@ -203,9 +285,11 @@ export const PopupApp: React.FC = () => {
             borderRadius: '6px',
             fontSize: '13px',
             lineHeight: '1.6',
-            color: '#333'
+            color: '#333',
+            maxHeight: '150px',
+            overflowY: 'auto'
           }}>
-            <p style={{ margin: '0 0 8px 0', fontWeight: '600', color: '#1976d2' }}>Begründung:</p>
+            <p style={{ margin: '0 0 8px 0', fontWeight: '600', color: '#1976d2' }}>💭 Begründung:</p>
             <p style={{ margin: 0, whiteSpace: 'pre-wrap' }}>{result.reasoning}</p>
           </div>
         </div>
@@ -215,21 +299,21 @@ export const PopupApp: React.FC = () => {
       <div style={{ display: 'flex', gap: '8px' }}>
         <button
           onClick={handleAnalyze}
-          disabled={isLoading || !selectedText || !!result}
+          disabled={isLoading || !textToAnalyze || !!result}
           style={{
             flex: 1,
             padding: '12px',
-            background: isLoading || !selectedText || !!result ? '#ccc' : '#4CAF50',
+            background: isLoading || !textToAnalyze || !!result ? '#ccc' : '#4CAF50',
             color: 'white',
             border: 'none',
             borderRadius: '6px',
             fontSize: '13px',
             fontWeight: '600',
-            cursor: isLoading || !selectedText || !!result ? 'not-allowed' : 'pointer',
+            cursor: isLoading || !textToAnalyze || !!result ? 'not-allowed' : 'pointer',
             transition: 'background 0.2s'
           }}
         >
-          Analysieren
+          🚀 Analysieren
         </button>
         {result && (
           <button
@@ -247,7 +331,7 @@ export const PopupApp: React.FC = () => {
               transition: 'background 0.2s'
             }}
           >
-            Neuer Text
+            🔄 Neuer Text
           </button>
         )}
       </div>
@@ -268,7 +352,7 @@ export const PopupApp: React.FC = () => {
             fontSize: '12px'
           }}
         >
-          Einstellungen
+          ⚙️ Einstellungen
         </a>
       </div>
 
