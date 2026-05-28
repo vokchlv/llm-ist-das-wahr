@@ -14,7 +14,7 @@ chrome.runtime.onInstalled.addListener(() => {
         apiKeys: {
           openai: { key: '', model: 'gpt-3.5-turbo' },
           anthropic: { key: '', model: 'claude-3-sonnet-20240229' },
-          gemini: { key: '', model: 'gemini-2.0-flash' },
+          gemini: { key: '', model: 'gemini-3.5-flash' },
           pollinations: { key: '', model: 'default' }
         }
       };
@@ -210,10 +210,13 @@ async function callGemini(text, apiKey, systemPrompt) {
   }
 
   try {
-    const model = 'gemini-2.0-flash';
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
+    const model = 'gemini-3.5-flash';
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'x-goog-api-key': `${apiKey}`,
+        'Content-Type': 'application/json'
+      },
       body: JSON.stringify({
         contents: [{
           parts: [
@@ -222,7 +225,7 @@ async function callGemini(text, apiKey, systemPrompt) {
           ]
         }],
         generationConfig: {
-          maxOutputTokens: 500
+          maxOutputTokens: 10000
         }
       })
     });
@@ -251,7 +254,7 @@ async function callGemini(text, apiKey, systemPrompt) {
     return {
       verdict: extractVerdict(reasoning),
       reasoning,
-      provider: 'Google Gemini (2.0 Flash)'
+      provider: 'Google Gemini (3.5 Flash)'
     };
   } catch (error) {
     console.error('[Gemini] Fatal error:', error);
@@ -259,19 +262,18 @@ async function callGemini(text, apiKey, systemPrompt) {
   }
 }
 
-async function callPollinations(text, apiKey, systemPrompt) {
+async function callPollinations(text, systemPrompt) {
   console.log('[Pollinations] Calling API');
   
   try {
     // Pollinations.ai is free and doesn't require an API key
-    const response = await fetch('https://text.pollinations.ai/openai/v1/chat/completions', {
+    const response = await fetch('https://text.pollinations.ai/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        ...(apiKey && { 'Authorization': `Bearer ${apiKey}` })
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model: 'gpt-3.5-turbo',
+        model: 'openai',
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: text }

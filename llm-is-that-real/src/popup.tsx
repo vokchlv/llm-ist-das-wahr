@@ -6,6 +6,63 @@ interface AnalysisResult {
   provider: string
 }
 
+const parseMarkdown = (text: string): React.ReactNode => {
+  const parts: React.ReactNode[] = []
+  let lastIndex = 0
+
+  // Match **text** for bold, *text* for italic, __text__ for underline
+  const regex = /\*\*(.+?)\*\*|\*(.+?)\*|__(.+?)__/g
+  let match
+
+  while ((match = regex.exec(text)) !== null) {
+    // Add text before the match
+    if (match.index > lastIndex) {
+      parts.push(
+        <span key={`text-${lastIndex}`}>
+          {text.substring(lastIndex, match.index)}
+        </span>
+      )
+    }
+
+    // Add the formatted text
+    if (match[1]) {
+      // **bold**
+      parts.push(
+        <strong key={`bold-${match.index}`} style={{ fontWeight: 'bold' }}>
+          {match[1]}
+        </strong>
+      )
+    } else if (match[2]) {
+      // *italic*
+      parts.push(
+        <em key={`italic-${match.index}`} style={{ fontStyle: 'italic' }}>
+          {match[2]}
+        </em>
+      )
+    } else if (match[3]) {
+      // __underline__
+      parts.push(
+        <u key={`underline-${match.index}`}>
+          {match[3]}
+        </u>
+      )
+    }
+
+    lastIndex = regex.lastIndex
+  }
+
+  // Add remaining text
+  if (lastIndex < text.length) {
+    parts.push(
+      <span key={`text-${lastIndex}`}>
+        {text.substring(lastIndex)}
+      </span>
+    )
+  }
+
+  return parts.length === 0 ? text : parts
+}
+
 export const PopupApp: React.FC = () => {
   const [selectedText, setSelectedText] = useState<string>('')
   const [manualText, setManualText] = useState<string>('')
@@ -290,7 +347,9 @@ export const PopupApp: React.FC = () => {
             overflowY: 'auto'
           }}>
             <p style={{ margin: '0 0 8px 0', fontWeight: '600', color: '#1976d2' }}>💭 Begründung:</p>
-            <p style={{ margin: 0, whiteSpace: 'pre-wrap' }}>{result.reasoning}</p>
+            <p style={{ margin: 0, whiteSpace: 'pre-wrap' }}>
+              {parseMarkdown(result.reasoning)}
+            </p>
           </div>
         </div>
       )}

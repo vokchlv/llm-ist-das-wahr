@@ -1,5 +1,37 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import { useState, useEffect } from 'react';
+const parseMarkdown = (text) => {
+    const parts = [];
+    let lastIndex = 0;
+    // Match **text** for bold, *text* for italic, __text__ for underline
+    const regex = /\*\*(.+?)\*\*|\*(.+?)\*|__(.+?)__/g;
+    let match;
+    while ((match = regex.exec(text)) !== null) {
+        // Add text before the match
+        if (match.index > lastIndex) {
+            parts.push(_jsx("span", { children: text.substring(lastIndex, match.index) }, `text-${lastIndex}`));
+        }
+        // Add the formatted text
+        if (match[1]) {
+            // **bold**
+            parts.push(_jsx("strong", { style: { fontWeight: 'bold' }, children: match[1] }, `bold-${match.index}`));
+        }
+        else if (match[2]) {
+            // *italic*
+            parts.push(_jsx("em", { style: { fontStyle: 'italic' }, children: match[2] }, `italic-${match.index}`));
+        }
+        else if (match[3]) {
+            // __underline__
+            parts.push(_jsx("u", { children: match[3] }, `underline-${match.index}`));
+        }
+        lastIndex = regex.lastIndex;
+    }
+    // Add remaining text
+    if (lastIndex < text.length) {
+        parts.push(_jsx("span", { children: text.substring(lastIndex) }, `text-${lastIndex}`));
+    }
+    return parts.length === 0 ? text : parts;
+};
 export const PopupApp = () => {
     const [selectedText, setSelectedText] = useState('');
     const [manualText, setManualText] = useState('');
@@ -181,7 +213,7 @@ export const PopupApp = () => {
                             color: '#333',
                             maxHeight: '150px',
                             overflowY: 'auto'
-                        }, children: [_jsx("p", { style: { margin: '0 0 8px 0', fontWeight: '600', color: '#1976d2' }, children: "\uD83D\uDCAD Begr\u00FCndung:" }), _jsx("p", { style: { margin: 0, whiteSpace: 'pre-wrap' }, children: result.reasoning })] })] })), _jsxs("div", { style: { display: 'flex', gap: '8px' }, children: [_jsx("button", { onClick: handleAnalyze, disabled: isLoading || !textToAnalyze || !!result, style: {
+                        }, children: [_jsx("p", { style: { margin: '0 0 8px 0', fontWeight: '600', color: '#1976d2' }, children: "\uD83D\uDCAD Begr\u00FCndung:" }), _jsx("p", { style: { margin: 0, whiteSpace: 'pre-wrap' }, children: parseMarkdown(result.reasoning) })] })] })), _jsxs("div", { style: { display: 'flex', gap: '8px' }, children: [_jsx("button", { onClick: handleAnalyze, disabled: isLoading || !textToAnalyze || !!result, style: {
                             flex: 1,
                             padding: '12px',
                             background: isLoading || !textToAnalyze || !!result ? '#ccc' : '#4CAF50',

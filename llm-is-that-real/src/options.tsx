@@ -14,7 +14,7 @@ export const OptionsApp: React.FC = () => {
   const [apiKeys, setApiKeys] = useState<ApiKeysConfig>({
     openai: { key: '', model: 'gpt-3.5-turbo' },
     anthropic: { key: '', model: 'claude-3-sonnet-20240229' },
-    gemini: { key: '', model: 'gemini-2.0-flash' },
+    gemini: { key: '', model: 'gemini-3.5-flash' },
     pollinations: { key: '', model: 'default' }
   })
   const [successMessage, setSuccessMessage] = useState('')
@@ -30,7 +30,7 @@ export const OptionsApp: React.FC = () => {
   const models: Record<string, string[]> = {
     openai: ['gpt-3.5-turbo', 'gpt-4', 'gpt-4-turbo'],
     anthropic: ['claude-3-sonnet-20240229', 'claude-3-opus-20240229', 'claude-3-haiku-20240307'],
-    gemini: ['gemini-3.1-flash-lite', 'gemini-3.1-pro', 'gemini-3-flash'],
+    gemini: ['gemini-3.5-flash-lite', 'gemini-3.5-pro', 'gemini-3.5-flash'],
     pollinations: ['default']
   }
 
@@ -47,7 +47,7 @@ export const OptionsApp: React.FC = () => {
         setApiKeys(config.apiKeys || {
           openai: { key: '', model: 'gpt-3.5-turbo' },
           anthropic: { key: '', model: 'claude-3-sonnet-20240229' },
-          gemini: { key: '', model: 'gemini-3.1-flash-lite' },
+          gemini: { key: '', model: 'gemini-3.5-flash' },
           pollinations: { key: '', model: 'default' }
         })
       }
