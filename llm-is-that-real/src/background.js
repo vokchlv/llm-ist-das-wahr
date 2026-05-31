@@ -12,8 +12,8 @@ chrome.runtime.onInstalled.addListener(() => {
       const defaultConfig = {
         selectedProvider: 'pollinations',
         apiKeys: {
-          openai: { key: '', model: 'gpt-3.5-turbo' },
-          anthropic: { key: '', model: 'claude-3-sonnet-20240229' },
+          openai: { key: '', model: 'gpt-5.4-mini' },
+          anthropic: { key: '', model: 'claude-opus-4-6' },
           gemini: { key: '', model: 'gemini-3.5-flash' },
           pollinations: { key: '', model: 'default' }
         }
@@ -101,19 +101,15 @@ async function callOpenAI(text, apiKey, model, systemPrompt) {
   }
 
   try {
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    const response = await fetch('https://api.openai.com/v1/responses', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model: model || 'gpt-3.5-turbo',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: text }
-        ],
-        max_tokens: 500
+        model: model || 'gpt-5.4-mini',
+        input: systemPrompt + ' ' + text
       })
     });
 
@@ -140,7 +136,7 @@ async function callOpenAI(text, apiKey, model, systemPrompt) {
     return {
       verdict: extractVerdict(reasoning),
       reasoning,
-      provider: 'OpenAI (' + (model || 'gpt-3.5-turbo') + ')'
+      provider: 'OpenAI (' + (model || 'gpt-5.4-mini') + ')'
     };
   } catch (error) {
     console.error('[OpenAI] Fatal error:', error);
@@ -164,7 +160,7 @@ async function callAnthropic(text, apiKey, systemPrompt) {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model: 'claude-3-sonnet-20240229',
+        model: 'claude-opus-4-6',
         max_tokens: 1024,
         system: systemPrompt,
         messages: [{ role: 'user', content: text }]
@@ -278,7 +274,7 @@ async function callPollinations(text, systemPrompt) {
           { role: 'system', content: systemPrompt },
           { role: 'user', content: text }
         ],
-        max_tokens: 500
+        max_tokens: 1000
       })
     });
 

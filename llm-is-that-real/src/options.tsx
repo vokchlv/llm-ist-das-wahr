@@ -12,8 +12,8 @@ interface ApiKeysConfig {
 export const OptionsApp: React.FC = () => {
   const [selectedProvider, setSelectedProvider] = useState('pollinations')
   const [apiKeys, setApiKeys] = useState<ApiKeysConfig>({
-    openai: { key: '', model: 'gpt-3.5-turbo' },
-    anthropic: { key: '', model: 'claude-3-sonnet-20240229' },
+    openai: { key: '', model: 'gpt-5.4-mini' },
+    anthropic: { key: '', model: 'claude-opus-4-6' },
     gemini: { key: '', model: 'gemini-3.5-flash' },
     pollinations: { key: '', model: 'default' }
   })
@@ -28,8 +28,8 @@ export const OptionsApp: React.FC = () => {
   ]
 
   const models: Record<string, string[]> = {
-    openai: ['gpt-3.5-turbo', 'gpt-4', 'gpt-4-turbo'],
-    anthropic: ['claude-3-sonnet-20240229', 'claude-3-opus-20240229', 'claude-3-haiku-20240307'],
+    openai: ['gpt-5.4-mini', 'gpt-4', 'gpt-4-turbo'],
+    anthropic: ['claude-opus-4-6', 'claude-3-opus-20240229', 'claude-3-haiku-20240307'],
     gemini: ['gemini-3.5-flash-lite', 'gemini-3.5-pro', 'gemini-3.5-flash'],
     pollinations: ['default']
   }
