@@ -109,7 +109,7 @@ async function callOpenAI(text, apiKey, model, systemPrompt) {
       },
       body: JSON.stringify({
         model: model || 'gpt-5.4-mini',
-        input: systemPrompt + ' ' + text
+        input: systemPrompt + ' ' + text + '!'
       })
     });
 
@@ -126,7 +126,7 @@ async function callOpenAI(text, apiKey, model, systemPrompt) {
       throw new Error(`OpenAI API error: ${data.error?.message || response.status}`);
     }
 
-    const reasoning = data.choices?.[0]?.message?.content;
+    const reasoning = data?.output?.[0]?.content?.[0]?.text;
     if (!reasoning) {
       throw new Error('OpenAI returned empty response');
     }
