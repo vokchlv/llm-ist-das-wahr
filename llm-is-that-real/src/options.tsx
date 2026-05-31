@@ -28,7 +28,7 @@ export const OptionsApp: React.FC = () => {
   ]
 
   const models: Record<string, string[]> = {
-    openai: ['gpt-5.4-mini', 'gpt-4', 'gpt-4-turbo'],
+    openai: ['gpt-5.4-mini', 'gpt-5.4', 'gpt-5.5'],
     anthropic: ['claude-opus-4-6', 'claude-3-opus-20240229', 'claude-3-haiku-20240307'],
     gemini: ['gemini-3.5-flash-lite', 'gemini-3.5-pro', 'gemini-3.5-flash'],
     pollinations: ['default']

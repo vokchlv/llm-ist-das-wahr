@@ -32,8 +32,8 @@ export const OptionsApp = () => {
                 const config = data.extensionConfig;
                 setSelectedProvider(config.selectedProvider || 'pollinations');
                 setApiKeys(config.apiKeys || {
-                    openai: { key: '', model: 'gpt-5.4-mini' },
-                    anthropic: { key: '', model: 'claude-opus-4-6' },
+                    openai: { key: '', model: 'gpt-3.5-turbo' },
+                    anthropic: { key: '', model: 'claude-3-sonnet-20240229' },
                     gemini: { key: '', model: 'gemini-3.5-flash' },
                     pollinations: { key: '', model: 'default' }
                 });
