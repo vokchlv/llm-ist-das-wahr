@@ -51,7 +51,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       console.error('[Background] Analysis error:', error);
       sendResponse({ success: false, error: error.message });
     });
-    return true; // Async response
+    return true;
   }
 });
 

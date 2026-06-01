@@ -177,7 +177,8 @@ export const OptionsApp: React.FC = () => {
         )}
 
         {/* API Key Input */}
-        <div style={{ marginBottom: '15px' }}>
+        {selectedProvider !== 'pollinations' && (
+          <div style={{ marginBottom: '15px' }}>
           <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', color: '#333', fontSize: '14px' }}>
             API-Key:
           </label>
@@ -185,7 +186,7 @@ export const OptionsApp: React.FC = () => {
             type="password"
             value={apiKeys[selectedProvider]?.key || ''}
             onChange={(e) => handleKeyChange(selectedProvider, e.target.value)}
-            placeholder={selectedProvider === 'pollinations' ? '(Optional)' : 'API-Key eingeben...'}
+            placeholder="Geben Sie hier Ihren API-Key ein."
             style={{
               width: '100%',
               padding: '12px',
@@ -196,12 +197,12 @@ export const OptionsApp: React.FC = () => {
             }}
           />
           <small style={{ display: 'block', marginTop: '8px', color: '#999', fontSize: '12px' }}>
-            {selectedProvider === 'pollinations' && 'Kostenlos - kein Key nötig'}
             {selectedProvider === 'openai' && 'Den Key erhalten Sie unter platform.openai.com'}
             {selectedProvider === 'anthropic' && 'Den Key erhalten Sie unter console.anthropic.com'}
             {selectedProvider === 'gemini' && 'Den Key erhalten Sie unter ai.google.dev'}
           </small>
         </div>
+        )}
 
         {/* Model Selection */}
         <div style={{ marginBottom: '15px' }}>
@@ -237,16 +238,16 @@ export const OptionsApp: React.FC = () => {
           color: '#333'
         }}>
           {selectedProvider === 'pollinations' && (
-            <p>Pollinations.ai bietet kostenlose AI-Modelle ohne API-Key. Die Ergebnisse können jedoch variieren.</p>
+            <p>Das Modell von Pollinations.ai bietet zwar kostenlose Ergebnisse, jedoch kann hier keine zuverlässige Auswertung durchgeführt werden.</p>
           )}
           {selectedProvider === 'openai' && (
-            <p>OpenAI bietet zwar zahlpflichtige, aber sehr zuverlässige Modelle.</p>
+            <p>Die Modelle von OpenAI sind bekannt für ihre hohe Qualität und Zuverlässigkeit. Im kostenlosen Tarif steht allerdings nur das Mini-Modell zur Verfügung.</p>
           )}
           {selectedProvider === 'anthropic' && (
-            <p>Anthropic Claude ist bekannt für hohe Qualität und Sicherheit.</p>
+            <p>Anthropic Claude ist bekannt für hohe Qualität und zuverlässige Ergebnisse.</p>
           )}
           {selectedProvider === 'gemini' && (
-            <p>Google Gemini ist schnell und bietet kostenlose API Token zur Verwendung an.</p>
+            <p>Google Gemini ist bekannt für seine schnelle Verarbeitung und bietet kostenlose und zuverlässige API-Token zur Verwendung an.</p>
           )}
         </div>
       </div>
@@ -284,7 +285,7 @@ export const OptionsApp: React.FC = () => {
       }}>
         <h3 style={{ marginBottom: '10px', fontSize: '13px' }}>Alle Provider:</h3>
         <ul style={{ margin: 0, paddingLeft: '20px', lineHeight: '1.8' }}>
-          <li><strong>Pollinations.ai:</strong> Kostenlos, kein Key</li>
+          <li><strong>Pollinations.ai:</strong> Kostenlos, kein Key nötig</li>
           <li><strong>OpenAI:</strong> <a href="https://platform.openai.com/api-keys" target="_blank" rel="noreferrer" style={{ color: '#1976d2' }}>platform.openai.com</a></li>
           <li><strong>Anthropic:</strong> <a href="https://console.anthropic.com" target="_blank" rel="noreferrer" style={{ color: '#1976d2' }}>console.anthropic.com</a></li>
           <li><strong>Google Gemini:</strong> <a href="https://ai.google.dev" target="_blank" rel="noreferrer" style={{ color: '#1976d2' }}>ai.google.dev</a></li>
