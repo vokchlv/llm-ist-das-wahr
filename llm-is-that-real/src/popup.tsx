@@ -167,7 +167,8 @@ export const PopupApp: React.FC = () => {
       {/* Header */}
       <div style={{ marginBottom: '20px', textAlign: 'center' }}>
         <h1 style={{ fontSize: '24px', margin: '0 0 5px 0', color: '#1976d2' }}>🔍 Ist das wahr?</h1>
-        <p style={{ fontSize: '12px', color: '#666', margin: 0 }}>AI-powered fact-checking</p>
+        <p style={{ fontSize: '12px', color: '#666', margin: 0 }}>AI-gestützte Faktenprüfung</p>
+        <p style={{ fontSize: '12px', color: '#666', margin: 0 }}>AI kann Fehler machen, daher im Zweifel vorsichtig sein!</p>
       </div>
 
       {/* Text Input Tabs */}
