@@ -312,15 +312,14 @@ async function callPollinations(text, systemPrompt) {
 function extractVerdict(text) {
   const lower = text.toLowerCase();
   
-  // Check for verdicts in German
-  if (lower.includes('falsch') || lower.includes('irreführend') || lower.includes('ist falsch') || lower.includes('nicht wahr')) {
-    return 'FALSCH';
-  }
-  if (lower.includes('teilweise') || lower.includes('teilweise wahr') || lower.includes('teils')) {
-    return 'TEILWEISE';
-  }
   if (lower.includes('wahr') || lower.includes('ist wahr') || lower.includes('ist korrekt')) {
     return 'WAHR';
+  }
+  if (lower.includes('teilweise') || lower.includes('teils') || lower.includes('teilweise wahr') || lower.includes('teilweise falsch')) {
+    return 'TEILWEISE';
+  }
+  if (lower.includes('falsch') || lower.includes('irreführend') || lower.includes('ist falsch') || lower.includes('nicht wahr')) {
+    return 'FALSCH';
   }
   
   return 'UNKNOWN';
